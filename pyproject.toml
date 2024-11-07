@@ -1,0 +1,161 @@
+[project]
+name = "delinkify"
+version = "0.1.0"
+description = "bot that delinkifies links"
+requires-python = ">=3.12"
+dependencies = [
+    "loguru>=0.7.2",
+    "python-telegram-bot>=21.7",
+    "yt-dlp>=2024.11.4",
+]
+
+[project.scripts]
+delinkify = "delinkify:main.main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+target-version = 'py312'
+line-length = 120
+
+[project.optional-dependencies]
+dev = ["ruff==0.7.2"]
+
+[tool.ruff.format]
+quote-style = 'single'
+
+[tool.ruff.lint]
+preview = true
+
+select = [
+    'E',      # pycodestyle
+    'F',      # pyflakes
+    'N',      # pep8-naming
+    'Q',      # flake8-quotes
+    'RUF',    # ruff
+    'UP',     # pyupgrade
+    'D212',   # flake8-docstrings
+    'S',      # flake8-bandit
+    'C4',     # flake8-comprehensions
+    'INT',    # flake8-gettext
+    'LOG',    # flake8-logging
+    'G',      # flake8-logging-format
+    'I',      # isort
+    'ICN001', # flake8-import-conventions
+    'B',      # flake8-bugbear
+    'A001',   # flake8-builtins
+    'COM',    # flake8-commas
+    'T10',    # flake8-debugger
+    'T20',    # flake8-todo
+    'EXE',    # flake8-executable
+    'ISC',    # flake8-implicit-str-concat
+    'PIE',    # flake8-pie
+    'PT',     # flake8-pytest-style
+    'RSE',    # flake8-raise
+    'RET504', # flake8-return
+    'SIM',    # flake8-simplify
+    'TID',    # flake8-tidy-imports
+    'PGH',    # pygrep-hooks
+    'PL',     # pylint
+    'TRY',    # tryceratops
+    'PERF',   # perflint
+    'FURB',   # refurb
+    'W',      # pycodestyle
+]
+
+ignore = [
+    'D107',
+    'D213',
+    'G004',
+    'E226',
+    'E731',
+    'RUF012',
+    'RUF015',
+    'UP038',
+    'S101',
+    'S311',
+    'S324',
+    'S404',
+    'S403',
+    'S405',
+    'S603',
+    'S607',
+    'B011',
+    'B904',
+    'COM812',
+    'PIE807',
+    'PT004',
+    'PT005',
+    'PT011',
+    'PT015',
+    'PT018',
+    'S301',
+    'SIM102',
+    'SIM103',
+    'SIM105',
+    'SIM108',
+    'SIM114',
+    'SIM117',
+    'PLC0415',
+    'PLC2701',
+    'PLR09',
+    'PLR0913',
+    'PLR2004',
+    'PLR6201',
+    'PLR6301',
+    'PLW0108',
+    'PLW1510',
+    'PLW1514',
+    'PLW1641',
+    'PLW2901',
+    'TRY002',
+    'TRY003',
+    'TRY300',
+    'TRY301',
+    'TRY400',
+    'PERF203',
+    'FURB113',
+    'FURB140',
+]
+
+extend-safe-fixes = [
+    'RUF005',
+    'C4',
+    'UP008',
+    'D200',
+    'D400',
+    'PT014',
+    'RSE102',
+    'RET504',
+    'SIM110',
+    'PERF102',
+]
+
+[tool.ruff.lint.per-file-ignores]
+'**/*_test.py' = ['S108', 'S602', 'D']
+'**/__init__.py' = ['F401']
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = 'single'
+multiline-quotes = 'double'
+docstring-quotes = 'double'
+avoid-escape = true
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
+parametrize-names-type = 'tuple'
+parametrize-values-type = 'list'
+parametrize-values-row-type = 'tuple'
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+ignore-decorators = [
+    "platform_input_support.tasks.report",
+    "platform_input_support.manifest.task_reporter.report",
+]
+
+[tool.ruff.per-file-ignores]
+"*_test.py" = ["D"]
