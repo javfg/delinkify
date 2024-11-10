@@ -12,7 +12,12 @@ class VideoDownloaderBot:
     def __init__(self, token: str):
         self.app = Application.builder().token(token).build()
         self.app.add_handler(InlineQueryHandler(self.inline_query))
-        self.ydl_params = {'format': 'best[ext=mp4]/best', 'quiet': True, 'no_warnings': True}
+        self.ydl_params = {
+            'format': 'best[ext=mp4]/best',
+            'quiet': True,
+            'no_warnings': True,
+            'noplaylist': True,
+        }
 
     def is_valid_url(self, url: str) -> bool:
         try:
