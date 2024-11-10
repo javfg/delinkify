@@ -21,12 +21,25 @@ class VideoDownloaderBot:
         except ValueError:
             return False
 
+    def get_good_url(self, info):
+        first_url = info.get('url')
+        if str(urlparse(first_url).path).endswith('.mp4'):
+            return first_url
+
+        for f in info.get('formats', []):
+            other_url = f.get('url')
+            if str(urlparse(other_url).path).endswith('.mp4'):
+                return other_url
+
+        return None
+
     def get_video_info(self, source: str) -> tuple[str, str, str] | None:
         try:
             with YoutubeDL(params=self.ydl_params) as ydl:
                 info = ydl.extract_info(source, download=False)
+
                 return (
-                    info.get('url'),
+                    self.get_good_url(info),
                     info.get('thumbnail', 'https://i.sstatic.net/PtbGQ.png'),
                     info.get('title', 'Downloaded video'),
                 )
