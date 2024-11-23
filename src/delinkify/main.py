@@ -1,87 +1,68 @@
 import os
-from urllib.parse import urlparse
-from uuid import uuid4
+import tempfile
 
 from loguru import logger
-from telegram import InlineQueryResultVideo, Update
-from telegram.ext import Application, ContextTypes, InlineQueryHandler
-from yt_dlp import YoutubeDL
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes, InlineQueryHandler
+
+from delinkify.handler import HandlerError
+from delinkify.logging import setup_logging
+from delinkify.router import Router
 
 
-class VideoDownloaderBot:
-    def __init__(self, token: str):
-        self.app = Application.builder().token(token).build()
-        self.app.add_handler(InlineQueryHandler(self.inline_query))
-        self.ydl_params = {
-            'format': 'best[ext=mp4]/best',
-            'quiet': True,
-            'no_warnings': True,
-            'noplaylist': True,
-        }
+class DelinkifyBot:
+    def __init__(self, token: str, router: Router):
+        self.app = Application.builder().read_timeout(60).write_timeout(60).token(token).build()
+        self.router = router
+        self.app.add_handler(CommandHandler('dl', self.dl))
+        self.app.add_handler(InlineQueryHandler(self.inline_dl))
 
-    def is_valid_url(self, url: str) -> bool:
-        try:
-            result = urlparse(url)
-            return all([result.scheme, result.netloc])
-        except ValueError:
-            return False
+    async def dl(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        if not context.args or update.edited_message:
+            return  # we do not care about messages without args or edited messages
+        url = context.args[0]
+        logger.debug(f'Received /dl command with args: {context.args}')
 
-    def get_good_url(self, info):
-        first_url = info.get('url')
-        if str(urlparse(first_url).path).endswith('.mp4'):
-            return first_url
+        handler = self.router.get_handler(url)
+        dm = None
+        if handler:
+            prefix = getattr(handler, 'name', 'unknown') + '-'
+            with tempfile.TemporaryDirectory(dir='.', prefix=prefix) as temp_dir:
+                try:
+                    dm = await handler.handle(temp_dir)
+                except HandlerError as e:
+                    logger.error(e)
+                await update.message.reply_media_group(media=dm.as_input_media(), caption=dm.caption)
 
-        for f in info.get('formats', []):
-            other_url = f.get('url')
-            if str(urlparse(other_url).path).endswith('.mp4'):
-                return other_url
+    async def inline_dl(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        url = update.inline_query.query
+        if not url:
+            return
+        logger.debug(f'Received inline query: {url}')
 
-        return None
-
-    def get_video_info(self, source: str) -> tuple[str, str, str] | None:
-        try:
-            with YoutubeDL(params=self.ydl_params) as ydl:
-                info = ydl.extract_info(source, download=False)
-
-                return (
-                    self.get_good_url(info),
-                    info.get('thumbnail', 'https://i.sstatic.net/PtbGQ.png'),
-                    info.get('title', 'Downloaded video'),
-                )
-        except Exception as e:
-            logger.error(f'Error getting video info: {e}')
-            return None
-
-    async def inline_query(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        query = update.inline_query.query
-        logger.info(f'Received inline query: {query}')
-
-        if not query or not self.is_valid_url(query):
-            logger.info(f'Invalid URL {query}')
-            return await update.inline_query.answer([])
-
-        video_url, thumbnail_url, title = self.get_video_info(query)
-        if not video_url:
-            return await update.inline_query.answer([])
-
-        result = [
-            InlineQueryResultVideo(
-                id=str(uuid4()),
-                video_url=video_url,
-                mime_type='video/mp4',
-                thumbnail_url=thumbnail_url,
-                title=title,
-                caption=title,
-            )
-        ]
-        await update.inline_query.answer(result)
+        handler = self.router.get_handler(url)
+        dm = None
+        if handler:
+            prefix = getattr(handler, 'name', 'unknown') + '-'
+            with tempfile.TemporaryDirectory(prefix=prefix, delete=False) as temp_dir:
+                try:
+                    dm = await handler.handle(temp_dir)
+                except HandlerError as e:
+                    logger.error(e)
+                await update.inline_query.answer(results=await dm.as_inline_query_results(context), cache_time=60)
 
     def run(self):
         self.app.run_polling()
 
 
 def main():
-    logger.info('Starting Video Downloader Bot')
     bot_token = os.getenv('BOT_TOKEN')
-    bot = VideoDownloaderBot(bot_token)
+    log_level = os.getenv('LOG_LEVEL', 'INFO')
+
+    setup_logging(log_level)
+    logger.info('Starting Video Downloader Bot')
+
+    router = Router()
+    bot = DelinkifyBot(bot_token, router)
+
     bot.run()
