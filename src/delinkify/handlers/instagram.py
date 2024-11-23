@@ -32,7 +32,7 @@ class InstagramHandler:
         # if the post is a just a video, we can use the default handler
         if post.is_video:
             logger.info(f'post {shortcode} is a video, deferring to default handler')
-            return await DefaultHandler(self.url).handle()
+            return await DefaultHandler(self.url).handle(None)
         else:
             i.download_post(post, temp_dir)
             fs = [f for f in Path(temp_dir).glob('*') if f.suffix.lower() in ['.jpg', '.mp4']]
@@ -42,5 +42,5 @@ class InstagramHandler:
             if f := next(caption_file, None):
                 caption = Path(f).read_bytes().decode('utf-8')[:1024]
 
-            logger.info(f'post {shortcode} contains {len(fs)-2} media in it')
+            logger.info(f'post {shortcode} contains {len(fs) - 2} media in it')
             return DelinkedMedia(files=fs[:6], caption=caption)
