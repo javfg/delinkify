@@ -8,4 +8,5 @@ services:
     container_name: bot_delinkify
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
+      - DUMP_CHANNEL_ID=${DUMP_CHANNEL_ID}
     restart: unless-stopped
