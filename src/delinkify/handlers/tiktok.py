@@ -2,7 +2,6 @@ import re
 from pathlib import Path
 from uuid import uuid4
 
-from loguru import logger
 from yt_dlp import YoutubeDL
 
 from delinkify.handler import DelinkedMedia, HandlerError, handle_like
@@ -39,8 +38,6 @@ class TiktokHandler:
         if not shortcode:
             raise HandlerError(f'invalid tiktok url {self.url}')
 
-        logger.info(f'tiktok shortcode: {shortcode}')
-
         with YoutubeDL(
             params={
                 **self.ydl_params,
@@ -52,6 +49,7 @@ class TiktokHandler:
                 raise HandlerError(f'no video found in {self.url}, perhaps it is too big?')
 
             files = [info['requested_downloads'][0]['filepath']]
-            caption = info['title']
+            webpage_url = info.get('webpage_url', self.url)
+            title = info['title']
 
-        return DelinkedMedia(files=files, caption=caption)
+        return DelinkedMedia(files=files, caption=f'{webpage_url}\n{title}'[:1024])

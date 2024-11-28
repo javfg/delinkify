@@ -15,7 +15,7 @@ class InstagramHandler:
         self.url = url
 
     async def handle(self, temp_dir: str) -> DelinkedMedia:
-        shortcode_re = r'https://www.instagram.com/(?:p|reel)/(?P<shortcode>[^/\n?]+)/?.*'
+        shortcode_re = r'(?P<prefix>https://www.instagram.com/(?:p|reel)/)(?P<shortcode>[^/\n?]+)/?.*'
 
         m = re.match(shortcode_re, self.url)
         if not m:
@@ -26,7 +26,7 @@ class InstagramHandler:
             raise HandlerError(f'invalid instagram url {self.url}')
 
         i = Instaloader(quiet=True, dirname_pattern=f'{temp_dir}')
-
+        short_url = f'{m.groupdict().get("prefix")}{shortcode}'
         post = Post.from_shortcode(i.context, shortcode)
 
         # if the post is a just a video, we can use the default handler
@@ -40,7 +40,7 @@ class InstagramHandler:
             caption = 'an instagram post'
             caption_file = Path(temp_dir).glob('*.txt')
             if f := next(caption_file, None):
-                caption = Path(f).read_bytes().decode('utf-8')[:1024]
+                caption = Path(f).read_bytes().decode('utf-8')
 
             logger.info(f'post {shortcode} contains {len(fs) - 2} media in it')
-            return DelinkedMedia(files=fs[:6], caption=caption)
+            return DelinkedMedia(files=fs[:6], caption=f'{short_url}\n{caption}'[:1024])

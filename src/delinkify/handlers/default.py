@@ -45,5 +45,8 @@ class DefaultHandler:
         if not video_url:
             raise HandlerError(f'no video found in {self.url}')
 
+        parsed_url = urlparse(self.url)
+        short_url = f'{parsed_url.scheme}://{parsed_url.netloc}/{parsed_url.path}'
+
         logger.info(f'found video {video_url} in {self.url}')
-        return DelinkedMedia(files=[video_url], caption=video_caption)
+        return DelinkedMedia(files=[video_url], caption=f'{short_url}\n{video_caption}'[:1024])
