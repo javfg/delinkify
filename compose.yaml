@@ -2,7 +2,7 @@
 # 2024-11-07
 
 services:
-  intensyfier:
+  delinkify:
     build:
       context: '.'
     container_name: bot_delinkify
