@@ -5,8 +5,15 @@ services:
   delinkify:
     build:
       context: '.'
+      args:
+        UID: ${DELINKIFY_UID:-1000}
+        GID: ${DELINKIFY_GID:-1000}
     container_name: bot_delinkify
     environment:
-      - BOT_TOKEN=${BOT_TOKEN}
-      - DUMP_CHANNEL_ID=${DUMP_CHANNEL_ID}
+      - DELINKIFY_TOKEN=${DELINKIFY_TOKEN}
+      - DELINKIFY_DUMP_GROUP_ID=${DELINKIFY_DUMP_GROUP_ID}
+      - DELINKIFY_LOG_LEVEL=${DELINKIFY_LOG_LEVEL:-INFO}
+      - DELINKIFY_LOG_PATH=${DELINKIFY_LOG_PATH:-./logs}
+    volumes:
+      - ${DELINKIFY_LOG_PATH:-./logs}:/app/logs
     restart: unless-stopped

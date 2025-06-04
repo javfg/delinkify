@@ -1,13 +1,23 @@
-import os
 import tempfile
 
 from loguru import logger
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, InlineQueryHandler
 
+from delinkify.config import config
 from delinkify.handler import HandlerError
-from delinkify.logging import setup_logging
 from delinkify.router import Router
+
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not isinstance(update, Update) or not update.inline_query:
+        return
+
+    logger.error(f'Request "{update.inline_query.query}" caused error "{context.error}"')
+
+    await context.bot.send_message(
+        chat_id=config.dump_group_id, text=f'Error in request: {update.inline_query.query}\n{context.error}'
+    )
 
 
 class DelinkifyBot:
@@ -16,6 +26,7 @@ class DelinkifyBot:
         self.router = router
         self.app.add_handler(CommandHandler('dl', self.dl))
         self.app.add_handler(InlineQueryHandler(self.inline_dl))
+        self.app.add_error_handler(error_handler)
 
     async def dl(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not context.args or update.edited_message:
@@ -56,13 +67,9 @@ class DelinkifyBot:
 
 
 def main():
-    bot_token = os.getenv('BOT_TOKEN')
-    log_level = os.getenv('LOG_LEVEL', 'INFO')
-
-    setup_logging(log_level)
     logger.info('Starting Video Downloader Bot')
 
     router = Router()
-    bot = DelinkifyBot(bot_token, router)
+    bot = DelinkifyBot(config.token, router)
 
     bot.run()

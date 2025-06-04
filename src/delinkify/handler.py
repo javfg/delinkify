@@ -15,7 +15,7 @@ from telegram import (
 )
 from telegram.ext import ContextTypes
 
-DUMP_CHANNEL_ID = os.getenv('DUMP_CHANNEL_ID')
+from delinkify.config import config
 
 
 class DelinkedMedia:
@@ -51,8 +51,8 @@ class DelinkedMedia:
         for f in self.files:
             match self.get_suffix(f):
                 case '.jpg':
-                    logger.debug(f'sending video {f} to dump')
-                    m = await context.bot.send_photo(DUMP_CHANNEL_ID, f)
+                    logger.debug(f'sending pic {f} to dump')
+                    m = await context.bot.send_photo(config.dump_group_id, f)
                     p = InlineQueryResultPhoto(
                         id=uuid4(),
                         photo_url=m.photo[0].file_id,
@@ -63,7 +63,7 @@ class DelinkedMedia:
                     rs.append(p)
                 case '.mp4':
                     logger.debug(f'sending video {f} to dump')
-                    m = await context.bot.send_video(DUMP_CHANNEL_ID, f)
+                    m = await context.bot.send_video(config.dump_group_id, f)
                     v = InlineQueryResultVideo(
                         id=uuid4(),
                         video_url=m.video.file_id,
