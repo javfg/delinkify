@@ -1,6 +1,8 @@
 FROM python:3.12.7-alpine3.20
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
+RUN apk add --no-cache ffmpeg
+
 ARG UID=1000
 ARG GID=1000
 
