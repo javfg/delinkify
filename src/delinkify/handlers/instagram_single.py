@@ -11,24 +11,27 @@ from delinkify.media import Media
 from delinkify.util import clean_url
 
 
-class TiktokURL(Handler):
-    """Handler for delinkifying TikTok posts using URLs."""
+class InstagramSingle(Handler):
+    """Handler for delinkifying Instagram post with a single video.
+
+    All reels are a single video, and some posts which will arrive here after
+    the InstagramPost handler yields them (when that one is implemented, if ever).
+    """
 
     url_patterns = [
-        r'^https://(www.|vm.)?tiktok.com/[\w-]+',
-        r'^https://(www.|vm.)?tiktok.com/@[\w-]+/video/\d+',
+        r'^https://(www.)?instagram.com/(share/)?reel/([\w-]+)',
+        r'^https://(www.)?instagram.com/p/([\w-]+)',
     ]
-    weight = 1000
+    weight = 500
 
     ydl_params: dict[str, Any] = {
-        'format': 'best[ext=mp4][filesize<10M]/best[filesize<10M]',
+        'format': 'bestvideo[ext=mp4][filesize_approx<35M]+bestaudio',
         'allow_multiple_audio_streams': True,
         'outtmpl': f'{config.tmp_dir}/%(id)s.%(ext)s',
         'quiet': True,
         'noprogress': True,
         'noplaylist': True,
         'logger': logger,
-        'max_filesize': 10 * 1024 * 1024,  # 10MiB
     }
 
     async def handle(self, url: str, context: DelinkifyContext) -> None:

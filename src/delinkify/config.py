@@ -3,11 +3,27 @@ import logging
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
 
 from dotenv import load_dotenv
 from loguru import logger
 
-from delinkify.util import must_path, must_str
+
+def must_str(env_var: str) -> str:
+    value = os.environ.get(env_var)
+    if value is None:
+        raise ValueError(f'missing required environment variable {env_var}')
+    return value
+
+
+def must_path(env_var: str) -> Path:
+    return Path(must_str(env_var)).absolute()
+
+
+def prepare_tmp_dir() -> Path:
+    tmp_dir = Path('/tmp/delinkify')  # noqa: S108
+    os.makedirs(tmp_dir, exist_ok=True)
+    return tmp_dir
 
 
 class InterceptHandler(logging.Handler):
@@ -39,8 +55,8 @@ class Config:
         self.dump_group_id = must_str('DELINKIFY_DUMP_GROUP_ID')
         log_path = must_path('DELINKIFY_LOG_PATH')
         log_level = os.environ.get('DELINKIFY_LOG_LEVEL', 'INFO')
+        self.tmp_dir = prepare_tmp_dir()
 
-        logging.basicConfig(handlers=[InterceptHandler()], force=True)
         logger.remove()
         logger.add(sink=sys.stderr, level=log_level)
         logger.add(

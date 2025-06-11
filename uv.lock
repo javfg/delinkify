@@ -58,10 +58,11 @@ wheels = [
 
 [[package]]
 name = "delinkify"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "dotenv" },
+    { name = "gallery-dl" },
     { name = "instaloader" },
     { name = "loguru" },
     { name = "python-telegram-bot" },
@@ -76,11 +77,12 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "dotenv", specifier = "==0.9.9" },
+    { name = "gallery-dl", specifier = ">=1.29.7" },
     { name = "instaloader", specifier = "==4.14.1" },
     { name = "loguru", specifier = "==0.7.3" },
     { name = "python-telegram-bot", specifier = "==22.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = "==0.11.12" },
-    { name = "yt-dlp", specifier = "==2025.5.22" },
+    { name = "yt-dlp", specifier = "==2025.6.9" },
 ]
 
 [[package]]
@@ -92,6 +94,18 @@ dependencies = [
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b2/b7/545d2c10c1fc15e48653c91efde329a790f2eecfbbf2bd16003b5db2bab0/dotenv-0.9.9-py2.py3-none-any.whl", hash = "sha256:29cf74a087b31dafdb5a446b6d7e11cbce8ed2741540e2339c69fbef92c94ce9", size = 1892 },
+]
+
+[[package]]
+name = "gallery-dl"
+version = "1.29.7"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a6/3e/e9c024254ff37553d02601205db34fdb854c9b556ee669679702807a50be/gallery_dl-1.29.7.tar.gz", hash = "sha256:5fabac1ca7279420bb3ebff5bff8cee80478f48ffb314a42f4ed580f122c0117", size = 554092 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c1/2e/3942147c2000a03021033124e8e634ac3f4b9e881f6adb0ba184051fd7f2/gallery_dl-1.29.7-py3-none-any.whl", hash = "sha256:63ff7aaed0a2f5013fa9a344f516f92802eaeaa653d0df72a14fa0b5c36e966b", size = 689041 },
 ]
 
 [[package]]
@@ -256,9 +270,9 @@ wheels = [
 
 [[package]]
 name = "yt-dlp"
-version = "2025.5.22"
+version = "2025.6.9"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/09/93/695cef32796dc7e76597e68a267a34a1b4e29bef8e12da445fa7c0ad1e55/yt_dlp-2025.5.22.tar.gz", hash = "sha256:ea73854c5dabc124f29a35a8fae9bc5d422ef3231bebeea2bdfa82ac191a9c29", size = 3017654 }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/fb/588a23e61586960273524d3aa726bd148116d422854f727f4d59c254cb6a/yt_dlp-2025.6.9.tar.gz", hash = "sha256:751f53a3b61353522bf805fa30bbcbd16666126537e39706eab4f8c368f111ac", size = 3028379 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/25/68/4f108193ebce3ee7beb5f9a21daa6bc875e261150b510be468626f151959/yt_dlp-2025.5.22-py3-none-any.whl", hash = "sha256:a49c4b76afeaded6254c3e2b759d8d5a13271aa963d5fccb51fe059d1c313151", size = 3264137 },
+    { url = "https://files.pythonhosted.org/packages/fd/e1/fa0dd2150b7b1033d917f37067c594160772fa607f311f10d4b881768b36/yt_dlp-2025.6.9-py3-none-any.whl", hash = "sha256:ebdfda9ffa807f6a26aed7c8f906e5557cd06b4c388dc547df1ec2078631fca8", size = 3276143 },
 ]

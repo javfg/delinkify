@@ -11,24 +11,23 @@ from delinkify.media import Media
 from delinkify.util import clean_url
 
 
-class TiktokURL(Handler):
-    """Handler for delinkifying TikTok posts using URLs."""
+class DailymotionURL(Handler):
+    """Handler for delinkifying Dailymotion videos."""
 
     url_patterns = [
-        r'^https://(www.|vm.)?tiktok.com/[\w-]+',
-        r'^https://(www.|vm.)?tiktok.com/@[\w-]+/video/\d+',
+        r'^https://(www.)?dailymotion.com/video/[\w-]+/?',
     ]
     weight = 1000
 
     ydl_params: dict[str, Any] = {
-        'format': 'best[ext=mp4][filesize<10M]/best[filesize<10M]',
+        'format': 'best[ext=mp4]',
         'allow_multiple_audio_streams': True,
         'outtmpl': f'{config.tmp_dir}/%(id)s.%(ext)s',
         'quiet': True,
         'noprogress': True,
         'noplaylist': True,
         'logger': logger,
-        'max_filesize': 10 * 1024 * 1024,  # 10MiB
+        'max_filesize': 40 * 1024 * 1024,  # 40MiB
     }
 
     async def handle(self, url: str, context: DelinkifyContext) -> None:
