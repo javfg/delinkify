@@ -27,6 +27,11 @@ class YoutubeShortURL(Handler):
         'noprogress': True,
         'noplaylist': True,
         'logger': logger,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['web'],
+            },
+        },
     }
 
     async def handle(self, url: str, context: DelinkifyContext) -> None:

@@ -42,6 +42,7 @@ class DelinkifyBot:
 
     async def inline_dl(self, update: Update, context: DelinkifyContext) -> None:
         await self.handle_query(update, context)
+        logger.trace(f'inline query results: {context.media}, errors: {context.errors}')
         if context.media:
             await update.inline_query.answer(  # type: ignore[union-attr]
                 results=[media.as_result() for media in context.media],
