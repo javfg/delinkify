@@ -5,7 +5,6 @@ from gallery_dl.job import DataJob
 from delinkify.context import DelinkifyContext
 from delinkify.handler import Handler, HandlerError
 from delinkify.media import Media
-from delinkify.util import clean_url
 
 
 class TwitterURL(Handler):
@@ -36,7 +35,8 @@ class TwitterURL(Handler):
                     await context.add_media(
                         Media(
                             source=item[1],
-                            caption=f'{clean_url(url)}\n{caption}'[:1024],
+                            caption=caption,
+                            original_url=url,
                             mime_type=item[2].get('mime_type'),
                         )
                     )
@@ -44,7 +44,8 @@ class TwitterURL(Handler):
                     await context.add_media(
                         Media(
                             source=item[1].split('?', 1)[0] + '.jpg',
-                            caption=f'{clean_url(url)}\n{caption}'[:1024],
+                            caption=caption,
+                            original_url=url,
                             mime_type=item[2].get('mime_type'),
                             height=item[2].get('height', 768),
                             width=item[2].get('width', 1024),

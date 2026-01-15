@@ -8,7 +8,6 @@ from delinkify.config import config
 from delinkify.context import DelinkifyContext
 from delinkify.handler import Handler
 from delinkify.media import Media
-from delinkify.util import clean_url
 
 
 class YoutubeShortURL(Handler):
@@ -37,7 +36,6 @@ class YoutubeShortURL(Handler):
     async def handle(self, url: str, context: DelinkifyContext) -> None:
         with YoutubeDL(params=self.ydl_params) as ydl:
             video_info = ydl.extract_info(url, download=True)
-            video_caption = video_info.get('title', 'Downloaded video')
 
         source = Path(ydl.prepare_filename(video_info))
         logger.info(f'downloaded video size: {source.stat().st_size} bytes')
@@ -45,6 +43,7 @@ class YoutubeShortURL(Handler):
         await context.add_media(
             Media(
                 source=source,
-                caption=f'{clean_url(url)}\n{video_caption}'[:1024],
+                caption=video_info.get('title'),
+                original_url=url,
             )
         )

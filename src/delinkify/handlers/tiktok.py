@@ -32,9 +32,8 @@ class TiktokURL(Handler):
     }
 
     async def handle(self, url: str, context: DelinkifyContext) -> None:
-        with YoutubeDL(params=self.ydl_params) as ydl:  # ty: ignore[invalid-argument-type]
+        with YoutubeDL(params=self.ydl_params) as ydl:
             video_info = ydl.extract_info(url, download=True)
-            video_caption = video_info.get('title', 'Downloaded video')
 
         source = Path(ydl.prepare_filename(video_info))
         logger.info(f'downloaded video size: {source.stat().st_size} bytes')
@@ -42,6 +41,7 @@ class TiktokURL(Handler):
         await context.add_media(
             Media(
                 source=source,
-                caption=f'{clean_url(url)}\n{video_caption}'[:1024],
+                caption=video_info.get('title'),
+                original_url=url,
             )
         )

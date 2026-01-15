@@ -8,7 +8,6 @@ from delinkify.config import config
 from delinkify.context import DelinkifyContext
 from delinkify.handler import Handler, HandlerError
 from delinkify.media import Media
-from delinkify.util import clean_url
 
 
 class InstagramMulti(Handler):
@@ -37,7 +36,7 @@ class InstagramMulti(Handler):
             i.download_post(post, tmpdir)
             fs = [f for f in Path(tmpdir).glob('*') if f.suffix.lower() in ['.jpg', '.mp4']]
             fs.sort()
-            caption = 'an instagram post'
+            caption = None
             caption_file = Path(tmpdir).glob('*.txt')
             if f := next(caption_file, None):
                 caption = f.read_bytes().decode('utf-8')
@@ -47,6 +46,7 @@ class InstagramMulti(Handler):
                 await context.add_media(
                     Media(
                         source=f,
-                        caption=f'{clean_url(url)}\n{caption}'[:1024],
+                        caption=caption,
+                        original_url=url,
                     )
                 )

@@ -14,6 +14,7 @@ from telegram import (
 )
 
 from delinkify.config import config
+from delinkify.util import clean_url
 
 
 class Media:
@@ -21,12 +22,14 @@ class Media:
         self,
         source: Path | str,
         caption: str | None = None,
+        original_url: str | None = None,
         mime_type: str | None = None,
         height: int | None = None,
         width: int | None = None,
     ):
         self.source = source
-        self.caption = caption
+        self.caption = caption or 'Some unknown media'
+        self.original_url = clean_url(original_url) if original_url else None
         self.mime_type = mime_type or self._determine_mime_type(source)
         self.height = height
         self.width = width
@@ -51,11 +54,11 @@ class Media:
         if isinstance(self.source, str):
             return
         if self.mime_type.startswith('image/'):
-            m = await bot.send_photo(config.dump_group_id, self.source)
+            m = await bot.send_photo(config.dump_group_id, self.source, caption=self.original_url)
             self.url = m.photo[0].file_id
             self.thumbnail_url = m.photo[0].file_id
         elif self.mime_type.startswith('video/'):
-            m = await bot.send_video(config.dump_group_id, self.source)
+            m = await bot.send_video(config.dump_group_id, self.source, caption=self.original_url)
             if m.video:
                 self.url = m.video.file_id
                 if m.video.thumbnail:
@@ -70,7 +73,7 @@ class Media:
                 id=str(uuid4()),
                 photo_url=self.url,
                 title=self.caption[:140] if self.caption else 'A photo',
-                caption=self.caption,
+                caption=self.caption[:1024],
                 photo_width=self.width,
                 photo_height=self.height,
                 thumbnail_url=self.url,
@@ -80,7 +83,7 @@ class Media:
                 id=str(uuid4()),
                 video_url=self.url,
                 title=self.caption[:140] if self.caption else 'A video',
-                caption=self.caption,
+                caption=self.caption[:1024],
                 thumbnail_url=self.url,
                 mime_type=self.mime_type,
             )

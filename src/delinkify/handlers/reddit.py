@@ -5,7 +5,6 @@ from gallery_dl.job import DataJob
 from delinkify.context import DelinkifyContext
 from delinkify.handler import Handler, HandlerError
 from delinkify.media import Media
-from delinkify.util import clean_url
 
 
 class RedditURL(Handler):
@@ -27,7 +26,7 @@ class RedditURL(Handler):
         if not job.data:
             raise HandlerError(f'no data found for {url}')
 
-        caption = job.data[0][1].get('title', 'Downloaded media')
+        caption = job.data[0][1].get('title')
 
         for item in job.data[1:]:
             if len(item) == 3:
@@ -35,7 +34,8 @@ class RedditURL(Handler):
                     await context.add_media(
                         Media(
                             source=item[2].get('media', {}).get('reddit_video', {}).get('fallback_url'),
-                            caption=f'{clean_url(url)}\n{caption}'[:1024],
+                            caption=caption,
+                            original_url=url,
                         )
                     )
                 else:
@@ -44,7 +44,8 @@ class RedditURL(Handler):
                     await context.add_media(
                         Media(
                             source=item[1],
-                            caption=f'{clean_url(url)}\n{caption}'[:1024],
+                            caption=caption,
+                            original_url=url,
                             height=dimensions.get('y', 768),
                             width=dimensions.get('x', 1024),
                         )
