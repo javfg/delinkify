@@ -8,7 +8,7 @@ from delinkify.config import config
 from delinkify.context import DelinkifyContext
 from delinkify.handler import Handler
 from delinkify.media import Media
-from delinkify.util import clean_url
+from delinkify.util import get_cookie_file_path
 
 
 class TiktokURL(Handler):
@@ -29,6 +29,7 @@ class TiktokURL(Handler):
         'noplaylist': True,
         'logger': logger,
         'max_filesize': 10 * 1024 * 1024,  # 10MiB
+        'cookiefile': get_cookie_file_path('tiktok'),
     }
 
     async def handle(self, url: str, context: DelinkifyContext) -> None:
