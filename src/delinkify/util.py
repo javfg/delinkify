@@ -16,6 +16,19 @@ async def error_handler(update: object, context: DelinkifyContext) -> None:
         text=f'all handlers failed for: {update.inline_query.query}\n\n{error_text}',
         disable_web_page_preview=True,
     )
+    await update.inline_query.answer(
+        results=[
+            InlineQueryResultArticle(
+                id='error',
+                title='Error processing your request',
+                input_message_content=InputTextMessageContent(
+                    'The spectacle resists delinkification. The machine fights '
+                    'for its survival. Try with another video.'
+                ),
+            )
+        ],
+        cache_time=0,
+    )
 
 
 async def send_unhandled_link(update: Update) -> None:
