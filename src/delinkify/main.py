@@ -3,9 +3,8 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, InlineQueryHandler
 
 from delinkify.config import config
-from delinkify.handler import DelinkifyContext, HandlerError
+from delinkify.handler import DelinkifyContext, HandlerError, error_handler, send_unhandled_link
 from delinkify.router import Router
-from delinkify.util import error_handler, send_unhandled_link
 
 
 class DelinkifyBot:
