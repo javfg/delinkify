@@ -42,7 +42,7 @@ class Media:
             case str():
                 mime_type, _ = mimetypes.guess_type(urlparse(source).path)
             case Path():
-                mime_type, _ = mimetypes.guess_type(source)  # type: ignore[no-any-return]
+                mime_type, _ = mimetypes.guess_type(source)
         if not mime_type:
             raise ValueError('could not determine mimetype')
         return mime_type

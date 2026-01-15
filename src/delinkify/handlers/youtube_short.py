@@ -36,7 +36,7 @@ class YoutubeShortURL(Handler):
 
     async def handle(self, url: str, context: DelinkifyContext) -> None:
         with YoutubeDL(params=self.ydl_params) as ydl:
-            video_info: dict[str, Any] = ydl.extract_info(url, download=True)  # type: ignore[attr-defined]
+            video_info = ydl.extract_info(url, download=True)
             video_caption = video_info.get('title', 'Downloaded video')
 
         source = Path(ydl.prepare_filename(video_info))

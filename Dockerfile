@@ -1,7 +1,7 @@
-FROM python:3.12.7-alpine3.20
+FROM python:3.14.2-alpine3.23
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-RUN apk add --no-cache ffmpeg
+RUN apk add --no-cache ffmpeg deno
 
 ARG UID=1000
 ARG GID=1000

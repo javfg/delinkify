@@ -41,10 +41,12 @@ class DelinkifyBot:
                 context.errors.append(HandlerError(f'handler {handler.name} failed: {e}'))
 
     async def inline_dl(self, update: Update, context: DelinkifyContext) -> None:
+        if update.inline_query is None:
+            return
         await self.handle_query(update, context)
         logger.trace(f'inline query results: {context.media}, errors: {context.errors}')
         if context.media:
-            await update.inline_query.answer(  # type: ignore[union-attr]
+            await update.inline_query.answer(
                 results=[media.as_result() for media in context.media],
                 cache_time=60,
             )

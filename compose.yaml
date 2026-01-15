@@ -1,6 +1,4 @@
-# Delinkify docker-compose!
-# 2024-11-07
-
+---
 services:
   delinkify:
     build:
