@@ -6,7 +6,7 @@ services:
       args:
         UID: ${DELINKIFY_UID:-1000}
         GID: ${DELINKIFY_GID:-1000}
-    container_name: bot_delinkify
+    container_name: bot-delinkify
     environment:
       - DELINKIFY_TOKEN=${DELINKIFY_TOKEN}
       - DELINKIFY_DUMP_GROUP_ID=${DELINKIFY_DUMP_GROUP_ID}
