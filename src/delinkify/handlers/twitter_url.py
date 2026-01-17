@@ -27,7 +27,7 @@ class TwitterURL(Handler):
             raise HandlerError(f'no data found for {url}')
 
         if len(job.data[0]) == 2 and job.data[0][0] == 2:
-            caption = job.data[0][1].get('content', 'Downloaded media')
+            caption = job.data[0][1].get('content')
 
         for item in job.data[1:]:
             if len(item) == 3:

@@ -11,8 +11,8 @@ from delinkify.media import Media
 from delinkify.util import get_cookie_file_path
 
 
-class TiktokURL(Handler):
-    """Handler for delinkifying TikTok posts using URLs."""
+class TiktokYTDLP(Handler):
+    """Handler for delinkifying TikTok posts using yt-dlp."""
 
     url_patterns = [
         r'^https://(www.|vm.)?tiktok.com/[\w-]+',
@@ -37,7 +37,7 @@ class TiktokURL(Handler):
             video_info = ydl.extract_info(url, download=True)
 
         source = Path(ydl.prepare_filename(video_info))
-        logger.info(f'downloaded video size: {source.stat().st_size} bytes')
+        logger.info(f'video size: {source.stat().st_size} bytes')
 
         await context.add_media(
             Media(
