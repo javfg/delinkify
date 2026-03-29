@@ -3,7 +3,6 @@ from typing import Any
 
 from loguru import logger
 from yt_dlp import YoutubeDL
-from yt_dlp.utils import DownloadError
 
 from delinkify.config import config
 from delinkify.context import DelinkifyContext
@@ -62,7 +61,7 @@ class InstagramSingle(Handler):
         await context.add_media(
             Media(
                 source=source,
-                caption=video_info.get('title'),
                 original_url=url,
+                caption=video_info.get('title'),
             )
         )

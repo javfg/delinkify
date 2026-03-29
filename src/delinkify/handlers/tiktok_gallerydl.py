@@ -45,8 +45,8 @@ class TiktokGalleryDL(Handler):
                 await context.add_media(
                     Media(
                         source=Path(tmpdir) / f,
-                        caption=f,
                         original_url=url,
+                        caption=f,
                         mime_type=mime_type,
                     )
                 )

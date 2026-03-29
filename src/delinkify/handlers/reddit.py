@@ -34,8 +34,8 @@ class RedditURL(Handler):
                     await context.add_media(
                         Media(
                             source=item[2].get('media', {}).get('reddit_video', {}).get('fallback_url'),
-                            caption=caption,
                             original_url=url,
+                            caption=caption,
                         )
                     )
                 else:
@@ -44,8 +44,8 @@ class RedditURL(Handler):
                     await context.add_media(
                         Media(
                             source=item[1],
-                            caption=caption,
                             original_url=url,
+                            caption=caption,
                             height=dimensions.get('y', 768),
                             width=dimensions.get('x', 1024),
                         )

@@ -53,8 +53,10 @@ class Config:
 
         self.token = must_str('DELINKIFY_TOKEN')
         self.dump_group_id = must_str('DELINKIFY_DUMP_GROUP_ID')
-        log_path = must_path('DELINKIFY_LOG_PATH')
         log_level = os.environ.get('DELINKIFY_LOG_LEVEL', 'INFO')
+        log_path = must_path('DELINKIFY_LOG_PATH')
+        self.cache_path = os.environ.get('DELINKIFY_CACHE_PATH', './cache/cache.json')
+        self.cache_save_interval = int(os.environ.get('DELINKIFY_CACHE_SAVE_INTERVAL', '300'))
         self.tmp_dir = prepare_tmp_dir()
 
         logger.remove()

@@ -1,7 +1,10 @@
+import traceback
+
 from loguru import logger
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, InlineQueryHandler
 
+from delinkify.cache import Cache
 from delinkify.config import config
 from delinkify.handler import DelinkifyContext, HandlerError, error_handler, send_unhandled_link
 from delinkify.router import Router
@@ -14,6 +17,7 @@ class DelinkifyBot:
         self.app.add_handler(CommandHandler('dl', self.dl))
         self.app.add_handler(InlineQueryHandler(self.inline_dl))
         self.app.add_error_handler(error_handler)
+        self.cache = Cache()
         self.router = Router()
 
     async def handle_query(self, update: Update, context: DelinkifyContext) -> None:
@@ -27,17 +31,28 @@ class DelinkifyBot:
         if not (handlers := self.router.get_handlers(url)):
             await send_unhandled_link(update)
             return
+
+        # try cache first
+        try:
+            if self.cache.get(url, context):
+                logger.debug(f'obtained {len(context.media)} results from cache')
+                return
+        except Exception as e:
+            context.errors.append(Exception(f'cache lookup failed: {e} {traceback.format_exc()}'))
+
+        # try handlers in order of weight
         for handler in handlers:
             logger.trace(f'trying handler {handler.name} for {url}')
             try:
                 await handler.handle(url, context)
                 if context.media:
                     logger.debug(f'obtained {len(context.media)} results')
+                    self.cache.set(context.media)
                     break
                 else:
                     logger.debug(f'handler {handler.name} did not return results')
             except Exception as e:
-                context.errors.append(HandlerError(f'handler {handler.name} failed: {e}'))
+                context.errors.append(HandlerError(f'handler {handler.name} failed: {e} {traceback.format_exc()}'))
 
     async def inline_dl(self, update: Update, context: DelinkifyContext) -> None:
         if update.inline_query is None:

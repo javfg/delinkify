@@ -46,7 +46,7 @@ class InstagramMulti(Handler):
                 await context.add_media(
                     Media(
                         source=f,
-                        caption=caption,
                         original_url=url,
+                        caption=caption,
                     )
                 )

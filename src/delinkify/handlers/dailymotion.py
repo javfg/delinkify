@@ -39,7 +39,7 @@ class DailymotionURL(Handler):
         await context.add_media(
             Media(
                 source=source,
-                caption=video_info.get('title'),
                 original_url=url,
+                caption=video_info.get('title'),
             )
         )

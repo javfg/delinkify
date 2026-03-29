@@ -21,15 +21,15 @@ class Media:
     def __init__(
         self,
         source: Path | str,
+        original_url: str,
         caption: str | None = None,
-        original_url: str | None = None,
         mime_type: str | None = None,
         height: int | None = None,
         width: int | None = None,
     ):
         self.source = source
+        self.original_url = clean_url(original_url)
         self.caption = caption or 'Some unknown media'
-        self.original_url = clean_url(original_url) if original_url else None
         self.mime_type = mime_type or self._determine_mime_type(source)
         self.height = height
         self.width = width

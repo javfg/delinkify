@@ -35,8 +35,8 @@ class TwitterURL(Handler):
                     await context.add_media(
                         Media(
                             source=item[1],
-                            caption=caption,
                             original_url=url,
+                            caption=caption,
                             mime_type=item[2].get('mime_type'),
                         )
                     )
@@ -44,8 +44,8 @@ class TwitterURL(Handler):
                     await context.add_media(
                         Media(
                             source=item[1].split('?', 1)[0] + '.jpg',
-                            caption=caption,
                             original_url=url,
+                            caption=caption,
                             mime_type=item[2].get('mime_type'),
                             height=item[2].get('height', 768),
                             width=item[2].get('width', 1024),
