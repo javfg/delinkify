@@ -1,6 +1,7 @@
 __pycache__
 .venv
 .env
-logs
-cookies
-cache
+/cache
+/cookies
+/logs
+/media

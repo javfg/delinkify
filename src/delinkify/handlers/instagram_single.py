@@ -4,10 +4,9 @@ from typing import Any
 from loguru import logger
 from yt_dlp import YoutubeDL
 
-from delinkify.config import config
 from delinkify.context import DelinkifyContext
 from delinkify.handler import Handler
-from delinkify.media import Media
+from delinkify.media import Media, MediaCollection
 
 
 class InstagramSingle(Handler):
@@ -25,7 +24,7 @@ class InstagramSingle(Handler):
 
     ydl_params: dict[str, Any] = {
         'allow_multiple_audio_streams': True,
-        'outtmpl': f'{config.tmp_dir}/%(id)s.%(ext)s',
+        'outtmpl': None,
         'quiet': True,
         'noprogress': True,
         'noplaylist': True,
@@ -41,9 +40,14 @@ class InstagramSingle(Handler):
         'merge_output_format': 'mp4',
     }
 
-    async def handle(self, url: str, context: DelinkifyContext) -> None:
+    async def handle(self, url: str, context: DelinkifyContext) -> MediaCollection:
+        mc = MediaCollection(url=url)
+        media_path = mc.get_media_path(context)
+        self.ydl_params['outtmpl'] = f'{media_path}/%(id)s.%(ext)s'
+
         with YoutubeDL(params=self.ydl_params) as ydl:
             video_info = ydl.extract_info(url, download=True)
+
         source = Path(ydl.prepare_filename(video_info))
 
         if 'requested_formats' in video_info:
@@ -56,12 +60,14 @@ class InstagramSingle(Handler):
             vcodec = video_info.get('vcodec', 'unknown')
             format_id = video_info.get('format_id', 'unknown')
 
-        logger.info(f'size:  {source.stat().st_size} bytes, codec: {vcodec}, format: {format_id}')
+        logger.info(f'size: {source.stat().st_size} bytes, codec: {vcodec}, format: {format_id}')
 
-        await context.add_media(
+        mc.add_media(
             Media(
                 source=source,
-                original_url=url,
                 caption=video_info.get('title'),
-            )
+            ),
+            context,
         )
+
+        return mc

@@ -2,17 +2,15 @@
 services:
   delinkify:
     build:
-      context: '.'
+      context: .
       args:
         UID: ${DELINKIFY_UID:-1000}
         GID: ${DELINKIFY_GID:-1000}
     container_name: bot-delinkify
-    environment:
-      - DELINKIFY_TOKEN=${DELINKIFY_TOKEN}
-      - DELINKIFY_DUMP_GROUP_ID=${DELINKIFY_DUMP_GROUP_ID}
-      - DELINKIFY_LOG_LEVEL=${DELINKIFY_LOG_LEVEL:-INFO}
-      - DELINKIFY_LOG_PATH=${DELINKIFY_LOG_PATH:-./logs}
+    env_file: .env
     volumes:
       - ${DELINKIFY_LOG_PATH:-./logs}:/app/logs
       - ${DELINKIFY_CACHE_PATH:-./cache}:/app/cache
+      - ${DELINKIFY_MEDIA_PATH:-./media}:/app/media
+      - ${DELINKIFY_COOKIE_PATH:-./cookies}:/app/cookies
     restart: unless-stopped

@@ -1,33 +1,24 @@
 import json
 
-import gallery_dl
-
 from delinkify.context import DelinkifyContext
 from delinkify.handler import Handler
 from delinkify.media import Media, MediaCollection
-from delinkify.util import gdl, get_cookie_file_path
+from delinkify.util import gdl
 
 
-class TiktokGalleryDL(Handler):
-    """Handler for delinkifying TikTok posts using gallery-dl."""
+class RedditURL(Handler):
+    """Handler for delinkifying Reddit posts using URLs."""
 
     url_patterns = [
-        r'^https://(www.|vm.)?tiktok.com/[\w-]+',
-        r'^https://(www.|vm.)?tiktok.com/@[\w-]+/video/\d+',
+        r'^https://(www\.|old\.|new\.|m\.)?reddit\.com/r/[\w-]+/comments/\w+(/[\w%-]*)?/?$',
+        r'^https://(www\.|old\.|new\.|m\.)?reddit\.com/gallery/\w+',
     ]
-    weight = 500
-
-    gallery_dl.config.set(('extractor', 'tiktok'), 'directory', [])
-    gallery_dl.config.set(('extractor', 'tiktok'), 'filename', '{id}_{num:>02}.{extension}')
+    weight = 1000
 
     async def handle(self, url: str, context: DelinkifyContext) -> MediaCollection:
         mc = MediaCollection(url=url)
         media_path = mc.get_media_path(context)
-        job = gdl(
-            url,
-            media_path,
-            cookie_file_path=get_cookie_file_path('tiktok', context),
-        )
+        job = gdl(url, media_path)
         job.run()
 
         caption = None

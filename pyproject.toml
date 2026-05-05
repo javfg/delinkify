@@ -1,7 +1,7 @@
 [project]
 name = "delinkify"
-version = "0.2.1"
-description = "bot that delinkifies links"
+version = "1.0.0"
+description = "Telegram bot that delinkifies social media posts"
 requires-python = ">=3.14"
 dependencies = [
     "gallery-dl==1.32.1",
@@ -13,19 +13,23 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ruff==0.14.12", "ty==0.0.12", "watchfiles>=1.1.1"]
+dev = ["ruff==0.15.12", "ty==0.0.34", "watchfiles>=1.1.1"]
 
 [project.scripts]
-delinkify = "delinkify:main.main"
+delinkify = "delinkify.main:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/delinkify"]
+
 [tool.ruff]
 target-version = 'py314'
 line-length = 120
 preview = true
+
 select = [
     'E',      # pycodestyle
     'F',      # pyflakes
@@ -33,6 +37,7 @@ select = [
     'Q',      # flake8-quotes
     'RUF',    # ruff
     'UP',     # pyupgrade
+    'D',      # pydocstyle
     'D212',   # flake8-docstrings
     'S',      # flake8-bandit
     'C4',     # flake8-comprehensions
@@ -61,69 +66,71 @@ select = [
     'FURB',   # refurb
     'W',      # pycodestyle
 ]
+
 ignore = [
-    'D107',
-    'D213',
-    'G004',
-    'E226',
-    'E731',
-    'RUF012',
-    'RUF015',
-    'S101',
-    'S311',
-    'S324',
-    'S404',
-    'S403',
-    'S405',
-    'S603',
-    'S607',
-    'B011',
-    'B904',
-    'COM812',
-    'PIE807',
-    'PT011',
-    'PT015',
-    'PT018',
-    'S301',
-    'SIM102',
-    'SIM103',
-    'SIM105',
-    'SIM108',
-    'SIM114',
-    'SIM117',
-    'PLC0414', # breaks explicit re-export
-    'PLC0415',
-    'PLC2701',
-    'PLR09',
-    'PLR0913',
-    'PLR2004',
-    'PLR6201',
-    'PLR6301',
-    'PLW0108',
-    'PLW1510',
-    'PLW1514',
-    'PLW1641',
-    'PLW2901',
-    'TRY002',
-    'TRY003',
-    'TRY300',
-    'TRY301',
-    'TRY400',
-    'PERF203',
-    'FURB113',
-    'FURB140',
+    'D1',      # no docstrings required
+    'D213',    # we prefer D212
+    'G004',    # we don't care about logging format
+    'E226',    # allow omitting whitespace around arithmetic operators
+    'E731',    # allow assigning lambdas (it's useful for single-line functions defined inside other functions)
+    'RUF012',  # ultra-noisy and dicts in classvars are very common
+    'RUF015',  # not always more readable
+    'S101',    # we use asserts outside tests, and do not run python with `-O` (also see B011)
+    'S311',    # false positives, it does not care about the context
+    'S324',    # all our md5/sha1 usages are for non-security purposes
+    'S404',    # useless, triggers on *all* subprocess imports
+    'S403',    # there's already a warning on using pickle, no need to have one for the import
+    'S405',    # we don't use lxml in unsafe ways
+    'S603',    # useless, triggers on *all* subprocess calls: https://github.com/astral-sh/ruff/issues/4045
+    'S607',    # we trust the PATH to be sane
+    'B011',    # we don't run python with `-O` (also see S101)
+    'B904',    # possibly useful but too noisy
+    'COM812',  # trailing commas on multiline lists are nice, but we have 2.5k violations
+    'PIE807',  # `lambda: []` is much clearer for `load_default` in schemas
+    'PT011',   # very noisy
+    'PT015',   # nice for tests but not so nice elsewhere
+    'PT018',   # ^ likewise
+    'S301',    # we trust our pickled data
+    'SIM102',  # sometimes nested ifs are more readable
+    'SIM103',  # sometimes this is more readable (especially when checking multiple conditions)
+    'SIM105',  # try-except-pass is faster and people are used to it
+    'SIM108',  # noisy ternary
+    'SIM114',  # sometimes separate ifs are more readable (especially if they just return a bool)
+    'SIM117',  # nested context managers may be more readable
+    'PLC0415', # local imports are there for a reason
+    'PLC2701', # some private imports are needed
+    'PLR09',   # too-many-<whatever> is just noisy
+    'PLR0913', # very noisy
+    'PLR2004', # extremely noisy and generally annoying
+    'PLR6201', # sets are faster (by a factor of 10!) but it's noisy and we're in nanoseconds territory
+    'PLR6301', # extremely noisy and generally annoying
+    'PLW0108', # a lambda often makes it more clear what you actually want
+    'PLW1510', # we often do not care about the status code of commands
+    'PLW1514', # we expect UTF8 environments everywhere
+    'PLW1641', # false positives with SA comparator classes
+    'PLW2901', # noisy and reassigning to the loop var is usually intentional
+    'PLW3201', # we use __conform__ for sqlite3 protocol adapters
+    'TRY002',  # super noisy, and those exceptions are pretty exceptional anyway
+    'TRY003',  # super noisy and also useless w/ werkzeugs http exceptions
+    'TRY300',  # kind of strange in many cases
+    'TRY301',  # sometimes doing that is actually useful
+    'TRY400',  # not all exceptions need exception logging
+    'PERF203', # noisy, false positives, and not applicable for 3.11+
+    'FURB113', # less readable
+    'FURB140', # less readable and actually slower in 3.12+
 ]
+
 extend-safe-fixes = [
-    'RUF005',
-    'C4',
-    'UP008',
-    'D200',
-    'D400',
-    'PT014',
-    'RSE102',
-    'RET504',
-    'SIM110',
-    'PERF102',
+    'RUF005',  # we typically don't deal with objects overriding `__add__` or `__radd__`
+    'C4',      # they seem pretty safe
+    'UP008',   # ^ likewise
+    'D200',    # ^ likewise
+    'D400',    # ^ likewise
+    'PT014',   # duplicate test case parametrizations are never intentional
+    'RSE102',  # we do not use `raise func()` (with `func` returning the exception instance)
+    'RET504',  # looks pretty safe
+    'SIM110',  # ^ likewise
+    'PERF102', # ^ likewise
 ]
 
 [tool.ruff.format]
@@ -134,10 +141,3 @@ inline-quotes = 'single'
 multiline-quotes = 'double'
 docstring-quotes = 'double'
 avoid-escape = true
-
-[tool.ruff.lint.flake8-pytest-style]
-fixture-parentheses = false
-mark-parentheses = false
-parametrize-names-type = 'tuple'
-parametrize-values-type = 'list'
-parametrize-values-row-type = 'tuple'

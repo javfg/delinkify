@@ -1,85 +1,44 @@
-import traceback
+from importlib.metadata import version
 
 from loguru import logger
-from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes, InlineQueryHandler
+from telegram.ext import Application, ChosenInlineResultHandler, ContextTypes, InlineQueryHandler
 
-from delinkify.cache import Cache
-from delinkify.config import config
-from delinkify.handler import DelinkifyContext, HandlerError, error_handler, send_unhandled_link
-from delinkify.router import Router
+from delinkify.config import Config
+from delinkify.context import DelinkifyContext
+from delinkify.handler.handler import chosen_inline, error_handler, inline_dl
+from delinkify.handler.router import Router
+from delinkify.util.cache import Cache
+
+config = Config.from_env()
 
 
 class DelinkifyBot:
-    def __init__(self, token: str):
+    def __init__(self):
         ct = ContextTypes(context=DelinkifyContext)
-        self.app = Application.builder().read_timeout(60).write_timeout(60).context_types(ct).token(token).build()
-        self.app.add_handler(CommandHandler('dl', self.dl))
-        self.app.add_handler(InlineQueryHandler(self.inline_dl))
+        self.app = (
+            Application
+            .builder()
+            .pool_timeout(60)
+            .read_timeout(60)
+            .write_timeout(60)
+            .context_types(ct)
+            .token(config.bot_token)
+            .build()
+        )
+        self.app.bot_data['config'] = config
+        self.app.bot_data['router'] = Router()
+        self.app.bot_data['pending']: list[str] = []  # list of result_ids that are pending materialization
+        self.app.bot_data['cache'] = Cache(config.cache_path, config.cache_save_interval)
         self.app.add_error_handler(error_handler)
-        self.cache = Cache()
-        self.router = Router()
-
-    async def handle_query(self, update: Update, context: DelinkifyContext) -> None:
-        if update.inline_query and update.inline_query.query:  # inline query
-            url = update.inline_query.query.strip()
-        elif context.args:  # direct command
-            url = context.args[0]
-        else:
-            return
-        logger.debug(f'received query: {url}')
-        if not (handlers := self.router.get_handlers(url)):
-            await send_unhandled_link(update)
-            return
-
-        # try cache first
-        try:
-            if self.cache.get(url, context):
-                logger.debug(f'obtained {len(context.media)} results from cache')
-                return
-        except Exception as e:
-            context.errors.append(Exception(f'cache lookup failed: {e} {traceback.format_exc()}'))
-
-        # try handlers in order of weight
-        for handler in handlers:
-            logger.trace(f'trying handler {handler.name} for {url}')
-            try:
-                await handler.handle(url, context)
-                if context.media:
-                    logger.debug(f'obtained {len(context.media)} results')
-                    self.cache.set(context.media)
-                    break
-                else:
-                    logger.debug(f'handler {handler.name} did not return results')
-            except Exception as e:
-                context.errors.append(HandlerError(f'handler {handler.name} failed: {e} {traceback.format_exc()}'))
-
-    async def inline_dl(self, update: Update, context: DelinkifyContext) -> None:
-        if update.inline_query is None:
-            return
-        await self.handle_query(update, context)
-        logger.trace(f'inline query results: {context.media}, errors: {context.errors}')
-        if context.media:
-            await update.inline_query.answer(
-                results=[media.as_result() for media in context.media],
-                cache_time=60,
-            )
-        elif context.errors:
-            await error_handler(update, context)
-
-    async def dl(self, update: Update, context: DelinkifyContext) -> None:
-        logger.debug(f'received dl command with args: {context.args}')
-        await self.handle_query(update, context)
-        if context.media and update.message:
-            await update.message.reply_media_group([
-                media.as_media(include_caption=(i == 0)) for i, media in enumerate(context.media)
-            ])
+        self.app.add_handler(InlineQueryHandler(inline_dl))
+        self.app.add_handler(ChosenInlineResultHandler(chosen_inline))
 
     def run(self):
         self.app.run_polling()
 
 
-def main():
-    logger.info('Starting Delinkify Bot...')
-    bot = DelinkifyBot(config.token)
+def main() -> None:
+    ver = version('delinkify')
+    logger.info(f'starting delinkify bot v{ver}...')
+    bot = DelinkifyBot()
     bot.run()

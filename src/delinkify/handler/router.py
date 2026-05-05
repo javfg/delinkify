@@ -29,8 +29,10 @@ class Router:
         return all([result.netloc, result.path])
 
     def load_handlers(self) -> None:
-        handler_dir = Path(__file__).parent / 'handlers'
+        logger.info('loading handlers...')
+        handler_dir = Path(__file__).parent.parent / 'handlers'
         for handler_path in handler_dir.glob('[!__]*.py'):
+            logger.debug(f'loading handler from {handler_path}')
             spec = spec_from_file_location(handler_path.stem, handler_path)
             if not spec or not spec.loader:
                 raise ImportError(f'could not load handler {handler_path}')

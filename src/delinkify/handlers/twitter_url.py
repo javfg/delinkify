@@ -1,10 +1,9 @@
-import os
-
-from gallery_dl.job import DataJob
+import gallery_dl
+from gallery_dl.job import DownloadJob
 
 from delinkify.context import DelinkifyContext
-from delinkify.handler import Handler, HandlerError
-from delinkify.media import Media
+from delinkify.handler import Handler
+from delinkify.media import Media, MediaCollection
 
 
 class TwitterURL(Handler):
@@ -16,38 +15,19 @@ class TwitterURL(Handler):
     ]
     weight = 1000
 
-    async def handle(self, url: str, context: DelinkifyContext) -> None:
-        # shut gallery-dl up
-        with open(os.devnull, 'w') as devnull:
-            job = DataJob(url)
-            job.file = devnull
-            job.run()
+    gallery_dl.config.set(('extractor', 'twitter'), 'directory', [])
 
-        if not job.data:
-            raise HandlerError(f'no data found for {url}')
+    async def handle(self, url: str, context: DelinkifyContext) -> MediaCollection:
+        mc = MediaCollection(url=url)
+        media_path = mc.get_media_path(context)
+        gallery_dl.config.set(('extractor',), 'base-directory', str(media_path))
 
-        if len(job.data[0]) == 2 and job.data[0][0] == 2:
-            caption = job.data[0][1].get('content')
+        job = DownloadJob(url)
+        job.run()
 
-        for item in job.data[1:]:
-            if len(item) == 3:
-                if item[2].get('type') == 'video':
-                    await context.add_media(
-                        Media(
-                            source=item[1],
-                            original_url=url,
-                            caption=caption,
-                            mime_type=item[2].get('mime_type'),
-                        )
-                    )
-                elif item[2].get('type') == 'photo':
-                    await context.add_media(
-                        Media(
-                            source=item[1].split('?', 1)[0] + '.jpg',
-                            original_url=url,
-                            caption=caption,
-                            mime_type=item[2].get('mime_type'),
-                            height=item[2].get('height', 768),
-                            width=item[2].get('width', 1024),
-                        )
-                    )
+        for f in media_path.rglob('*'):
+            if f.is_file():
+                m = Media(source=f, caption=f.name)
+                mc.add_media(m, context)
+
+        return mc

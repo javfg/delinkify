@@ -1,9 +1,11 @@
-from __future__ import annotations
-
-from telegram import Update
 from telegram.ext import Application, CallbackContext, ExtBot
+from yt_dlp.utils.jslib.devalue import TYPE_CHECKING
 
-from delinkify.media import Media
+from delinkify.config import Config
+from delinkify.handler.router import Router
+
+if TYPE_CHECKING:
+    from delinkify.util.cache import Cache
 
 
 class DelinkifyContext(CallbackContext[ExtBot, dict, dict, dict]):
@@ -14,26 +16,6 @@ class DelinkifyContext(CallbackContext[ExtBot, dict, dict, dict]):
         user_id: int | None = None,
     ) -> None:
         super().__init__(application=application, chat_id=chat_id, user_id=user_id)
-        self._media: list[Media] = []
-        self._update: Update | None = None
-        self.errors: list[Exception] = []
-
-    @classmethod
-    def from_update(cls, update: object, application: Application) -> DelinkifyContext:
-        return super().from_update(update, application)
-
-    @property
-    def media(self) -> list[Media]:
-        return self._media
-
-    async def add_media(self, media: Media) -> None:
-        await media.materialize(self.bot)
-        self._media.append(media)
-
-    @property
-    def update(self) -> Update | None:
-        return self._update
-
-    @update.setter
-    def update(self, value: Update | None) -> None:
-        self._update = value
+        self.config: Config = application.bot_data['config']
+        self.router: Router = application.bot_data['router']
+        self.cache: Cache = application.bot_data['cache']
