@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.1
+*Released on June 28, 2026*
+
+* Update dependencies to latest versions (`d124a30`)
+* Fixed dump messages failing html parsing because of errors containing `<` and
+  `>` characters (`c9cc71b`)
+* Be more lenient with formats in instagram single handler. Now it will fall back to
+  `best` format if the other formats fail (`929f187`)
+
+
 ## 1.0.0
 *Released on May 5, 2026*
 
