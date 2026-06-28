@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2
+*Released on June 28, 2026*
+
+* Install git in the docker image to allow uv to install dependencies from git
+  repositories (`6ab541c`)
+
+
 ## 1.0.1
 *Released on June 28, 2026*
 
