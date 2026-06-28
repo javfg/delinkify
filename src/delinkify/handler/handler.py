@@ -84,6 +84,16 @@ async def chosen_inline(update, context: DelinkifyContext):
     await m.update_message(context, inline_message_id)
 
 
+def _replace_html_entities(src: str | Exception) -> str:
+    if isinstance(src, Exception):
+        text = str(src)
+    else:
+        text = src
+    text = text.replace('&', '&amp;')
+    text = text.replace('<', '&lt;')
+    return text.replace('>', '&gt;')
+
+
 async def error_handler(update: object, context: DelinkifyContext) -> None:
     if context.error is None:
         logger.error('error handler called without an error')
@@ -120,12 +130,19 @@ async def error_handler(update: object, context: DelinkifyContext) -> None:
         f'⚠️ <b>an error occurred</b>\n\n'
         f'{user_info}\n'
         f'{chat_info}\n\n'
-        f'<b>error:</b> {type(context.error).__name__}: {context.error}\n\n'
-        f'<b>traceback:</b>\n<pre>{tb}'
+        f'<b>error:</b> {type(context.error).__name__}: {_replace_html_entities(context.error)}\n\n'
+        f'<b>traceback:</b>\n<pre>{_replace_html_entities(tb)}'
     )
     message = message[:4000] + '</pre>'
 
-    await context.bot.send_message(chat_id=chat_id_errors, text=message, parse_mode='HTML')
+    logger.debug(f'sending error message to chat {chat_id_errors}: \n\n{message}\n\n')
+
+    await context.bot.send_message(
+        chat_id=chat_id_errors,
+        text=message,
+        parse_mode='HTML',
+        disable_web_page_preview=True,
+    )
 
 
 async def reply_unable(update: Update, context: DelinkifyContext, url: str) -> None:
