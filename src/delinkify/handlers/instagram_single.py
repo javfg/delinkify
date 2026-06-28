@@ -35,7 +35,8 @@ class InstagramSingle(Handler):
         'format': (
             'bestvideo[vcodec^=avc][filesize_approx<35M]+bestaudio/'
             'best[vcodec^=avc][filesize_approx<35M]/'
-            'best[filesize_approx<35M]'
+            'best[filesize_approx<35M]/'
+            'best'
         ),
         'merge_output_format': 'mp4',
     }
