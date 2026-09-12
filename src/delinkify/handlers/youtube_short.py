@@ -18,7 +18,7 @@ class YoutubeShortURL(Handler):
     weight = 1000
 
     ydl_params: dict[str, Any] = {
-        'format': 'best[ext=mp4]',
+        'format': 'bv*[ext=mp4]+ba[ext=m4a]/b',
         'allow_multiple_audio_streams': True,
         'outtmpl': None,
         'quiet': True,
@@ -27,12 +27,13 @@ class YoutubeShortURL(Handler):
         'logger': logger,
         'extractor_args': {
             'youtube': {
-                'player_client': ['web'],
+                'extractor_args': {'youtube': {'player_client': ['safari']}},
             },
         },
     }
 
     async def handle(self, url: str, context: DelinkifyContext) -> MediaCollection:
+        logger.info(f'{url=}')
         mc = MediaCollection(url=url)
         media_path = mc.get_media_path(context)
         self.ydl_params['outtmpl'] = f'{media_path}/%(id)s.%(ext)s'
