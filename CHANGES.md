@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.3
+*Released on September 12, 2026*
+
+* Update dependencies to latest versions (`82cb071`)
+* Add Dockerignore file to lighen image (`72d2f68`)
+* Fix Youtube Short videos not finding formats (`60b313b`)
+
+
 ## 1.0.2
 *Released on June 28, 2026*
 
