@@ -29,7 +29,7 @@ ENV UV_NO_SYNC=1
 
 WORKDIR /app
 
-COPY --from=builder --chown=delinfify:delinfify /app /app
+COPY --from=builder --chown=delinkify:delinkify /app /app
 COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
 
 ARG UID=10001
