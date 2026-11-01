@@ -18,6 +18,7 @@ class DelinkifyBot:
         self.app = (
             Application
             .builder()
+            .connect_timeout(30)
             .pool_timeout(60)
             .read_timeout(60)
             .write_timeout(60)
@@ -27,7 +28,8 @@ class DelinkifyBot:
         )
         self.app.bot_data['config'] = config
         self.app.bot_data['router'] = Router()
-        self.app.bot_data['pending']: list[str] = []  # list of result_ids that are pending materialization
+        pending_materialization: list[str] = []
+        self.app.bot_data['pending'] = pending_materialization  # list of result_ids that are pending materialization
         self.app.bot_data['cache'] = Cache(config.cache_path, config.cache_save_interval)
         self.app.add_error_handler(error_handler)
         self.app.add_handler(InlineQueryHandler(inline_dl))

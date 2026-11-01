@@ -100,7 +100,7 @@ async def error_handler(update: object, context: DelinkifyContext) -> None:
         return
 
     if isinstance(context.error, NetworkError):
-        logger.warning(f'network error: {context.error}')
+        logger.warning(f'network error: {context.error}', exc_info=context.error)
         return
 
     logger.opt(exception=context.error).error('exception while handling an update')
