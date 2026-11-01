@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4
+*Released on November 1, 2026*
+
+* Update dependencies to latest versions (``)
+
 ## 1.0.3
 *Released on September 12, 2026*
 
