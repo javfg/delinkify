@@ -3,7 +3,7 @@
 ## 1.0.4
 *Released on November 1, 2026*
 
-* Update dependencies to latest versions (``)
+* Update dependencies to latest versions (`f1cef39`)
 
 ## 1.0.3
 *Released on September 12, 2026*
