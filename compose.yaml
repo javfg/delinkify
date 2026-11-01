@@ -13,4 +13,10 @@ services:
       - ${DELINKIFY_CACHE_PATH:-./cache}:/app/cache
       - ${DELINKIFY_MEDIA_PATH:-./media}:/app/media
       - ${DELINKIFY_COOKIE_PATH:-./cookies}:/app/cookies
+    logging:
+        driver: json-file
+        options:
+          max-size: "10m"
+          max-file: "5"
+          compress: "true"
     restart: unless-stopped
